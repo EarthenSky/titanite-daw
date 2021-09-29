@@ -4,6 +4,7 @@ use hound;
 
 // ------------------------------------------------------------------- //
 
+use iced;
 use iced::{button, Button, Column, Element, Sandbox, Settings, Text};
 
 #[derive(Default)]
@@ -65,9 +66,7 @@ impl Sandbox for Counter {
             .into()
     }
 
-
 }
-
 
 // ------------------------------------------------------------------- //
 
@@ -92,8 +91,8 @@ fn main() {
     }
 
     println!("{}", match Counter::run(Settings::default()) {
-        Error => "not good not good not good",
-        _ => "we all good",
+        Err(_e) => "not good not good not good",
+        Ok(_) => "we all good",
     });
 
 }
