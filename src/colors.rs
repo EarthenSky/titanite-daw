@@ -1,0 +1,1 @@
+// todo: define all gui colors here
