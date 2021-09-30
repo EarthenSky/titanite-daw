@@ -7,4 +7,5 @@ edition = "2018"
 
 [dependencies]
 hound = "3.4.0"
-iced = "0.3.0"
+iced = { version = "0.3.0", features = ["canvas", "tokio", "debug"]}
+#rand = "0.8.3"

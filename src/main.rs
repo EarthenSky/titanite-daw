@@ -4,14 +4,19 @@ use hound;
 
 // ------------------------------------------------------------------- //
 
-use iced;
-use iced::{button, Button, Column, Element, Sandbox, Settings, Text};
+use iced::{
+    button, Button,
+    canvas::{self, Cursor, Path, Stroke, Frame, Geometry},
+    executor, window, Application, Canvas, Clipboard, Color, Command, Text,
+    Element, Column, Length, Point, Rectangle, Settings, Size, Subscription, Vector
+};
 
 #[derive(Default)]
-struct Counter {
+struct GUIState {
     value: i32,
     increment_button: button::State,
     decrement_button: button::State,
+    canvasState: CanvasState,
 }
 
 // This enumerates all the possible ways we can interact with our ui
@@ -21,29 +26,51 @@ pub enum Message {
     DecrementPressed,
 }
 
-impl Sandbox for Counter {
+impl Application for GUIState {
+    type Executor = executor::Default;
     type Message = Message;
+    type Flags = ();
 
-    fn new() -> Self {
-        Self::default()
+    fn new(_flags: ()) -> (Self, Command<Self::Message>) {
+        (
+            GUIState {
+                value: 0,
+                increment_button: button::State::default(),
+                decrement_button: button::State::default(),
+                canvasState: CanvasState::default(),
+            },
+            Command::none(),
+        )
     }
 
     fn title(&self) -> String {
-        String::from("Counter - Iced")
+        String::from("Titanite DAW")
     }
 
-    fn update(&mut self, message: Message) {
+    fn update(&mut self, message: Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
             Message::IncrementPressed => {
                 self.value += 1;
+                self.canvasState.radius = self.value as f32;
             }
             Message::DecrementPressed => {
                 self.value -= 1;
+                self.canvasState.radius = self.value as f32;
             }
         }
+
+        Command::none()
     }
 
+    /*
+    fn subscription(&self) -> Subscription<Message> {
+        time::every(std::time::Duration::from_millis(10))
+            .map(|instant| Message::Tick(instant))
+    }
+    */
+
     fn view(&mut self) -> Element<Message> {
+
         // We use a column: a simple vertical layout
         Column::new()
             .padding(20)
@@ -63,10 +90,41 @@ impl Sandbox for Counter {
                 Button::new(&mut self.decrement_button, Text::new("-"))
                     .on_press(Message::DecrementPressed),
             )
+            .push(
+                Canvas::new(&mut self.canvasState),
+            )
             .into()
     }
 
 }
+
+
+// First, we define the data we need for drawing
+#[derive(Debug)]
+struct CanvasState {
+    radius: f32,
+}
+
+impl Default for CanvasState {
+    fn default() -> CanvasState {
+        CanvasState { radius: 5.0 }
+    }
+}
+
+// Then, we implement the `Program` trait
+impl canvas::Program<Message> for CanvasState {
+    fn draw(&self, bounds: Rectangle, _cursor: Cursor) -> Vec<Geometry> {
+        let mut frame = Frame::new(bounds.size());
+
+        // We create a `Path` representing a simple circle & fill it
+        let circle = Path::circle(frame.center(), self.radius);
+        frame.fill(&circle, Color::BLACK);
+
+        // Finally, we produce the geometry
+        vec![frame.into_geometry()]
+    }
+}
+
 
 // ------------------------------------------------------------------- //
 
@@ -90,7 +148,8 @@ fn main() {
         writer.write_sample(int_sample).unwrap();
     }
 
-    println!("{}", match Counter::run(Settings::default()) {
+    // Run Reactive GUI
+    println!("{}", match GUIState::run(Settings::default()) {
         Err(_e) => "not good not good not good",
         Ok(_) => "we all good",
     });
@@ -98,4 +157,3 @@ fn main() {
 }
 
 // ------------------------------------------------------------------- //
-
