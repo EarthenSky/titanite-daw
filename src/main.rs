@@ -4,7 +4,9 @@ use hound;
 
 use iced::{
     button, Button,
-    canvas::{self, Cursor, Path, Frame, Geometry}, Canvas,
+    canvas::{self, Cursor, Path, Frame, Geometry}, Canvas, 
+    widget::{Container},
+    Length, Point, Size, 
     executor, Application, Clipboard, Command, Settings, Subscription,
     Color, Text,
     Element, Column, Row, 
@@ -13,6 +15,7 @@ use iced::{
 
 // Declaring modules:
 mod model;
+mod colors;
 
 // ------------------------------------------------------------------- //
 
@@ -68,22 +71,24 @@ impl Application for GUIState {
 
     fn view(&mut self) -> Element<Message> {
 
-        // We use a column: a simple vertical layout
+        let menu_bar = Container::new(
+            Row::new()
+            .padding(0)
+            .push(
+                Button::new(&mut self.settings_button, Text::new("Settings"))
+                .on_press(Message::ShowSettings).style(colors::Button)
+            )
+        )
+        .width(Length::Fill)
+        .style(colors::Container);
+ 
+        let canvas = Canvas::new(&mut self.canvas_state)
+            .width(Length::Fill)
+            .height(Length::Fill);
+
         Column::new()
-            .padding(20)
-            .push(
-                Row::new()
-                    .push(
-                        // The increment button. We tell it to produce an
-                        // `IncrementPressed` message when pressed
-                        Button::new(&mut self.settings_button, Text::new("Settings"))
-                        .on_press(Message::ShowSettings),
-                    )
-                    
-            )
-            .push(
-                Canvas::new(&mut self.canvas_state),
-            )
+            .push(menu_bar)
+            .push(canvas)
             .into()
     }
 
@@ -106,6 +111,8 @@ impl Default for CanvasState {
 impl canvas::Program<Message> for CanvasState {
     fn draw(&self, bounds: Rectangle, _cursor: Cursor) -> Vec<Geometry> {
         let mut frame = Frame::new(bounds.size());
+
+        frame.fill_rectangle(Point::new(0.0, 0.0), frame.size(), Color::new(1.0, 1.0, 0.6, 1.0));
 
         // We create a `Path` representing a simple circle & fill it
         let circle = Path::circle(frame.center(), self.radius);
