@@ -2,28 +2,31 @@ use std::f32::consts::PI;
 use std::i16;
 use hound;
 
-// ------------------------------------------------------------------- //
-
 use iced::{
     button, Button,
-    canvas::{self, Cursor, Path, Stroke, Frame, Geometry},
-    executor, window, Application, Canvas, Clipboard, Color, Command, Text,
-    Element, Column, Length, Point, Rectangle, Settings, Size, Subscription, Vector
+    canvas::{self, Cursor, Path, Frame, Geometry}, Canvas,
+    executor, Application, Clipboard, Command, Settings, Subscription,
+    Color, Text,
+    Element, Column, Row, 
+    Rectangle,  
 };
+
+// Declaring modules:
+mod model;
+
+// ------------------------------------------------------------------- //
 
 #[derive(Default)]
 struct GUIState {
     value: i32,
-    increment_button: button::State,
-    decrement_button: button::State,
-    canvasState: CanvasState,
+    settings_button: button::State,
+    canvas_state: CanvasState,
 }
 
 // This enumerates all the possible ways we can interact with our ui
 #[derive(Debug, Clone, Copy)]
 pub enum Message {
-    IncrementPressed,
-    DecrementPressed,
+    ShowSettings,
 }
 
 impl Application for GUIState {
@@ -35,9 +38,8 @@ impl Application for GUIState {
         (
             GUIState {
                 value: 0,
-                increment_button: button::State::default(),
-                decrement_button: button::State::default(),
-                canvasState: CanvasState::default(),
+                settings_button: button::State::default(),
+                canvas_state: CanvasState::default(),
             },
             Command::none(),
         )
@@ -49,13 +51,8 @@ impl Application for GUIState {
 
     fn update(&mut self, message: Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
-            Message::IncrementPressed => {
-                self.value += 1;
-                self.canvasState.radius = self.value as f32;
-            }
-            Message::DecrementPressed => {
-                self.value -= 1;
-                self.canvasState.radius = self.value as f32;
+            Message::ShowSettings => {
+                println!("TODO: open settings window ...");
             }
         }
 
@@ -75,23 +72,17 @@ impl Application for GUIState {
         Column::new()
             .padding(20)
             .push(
-                // The increment button. We tell it to produce an
-                // `IncrementPressed` message when pressed
-                Button::new(&mut self.increment_button, Text::new("+"))
-                    .on_press(Message::IncrementPressed),
+                Row::new()
+                    .push(
+                        // The increment button. We tell it to produce an
+                        // `IncrementPressed` message when pressed
+                        Button::new(&mut self.settings_button, Text::new("Settings"))
+                        .on_press(Message::ShowSettings),
+                    )
+                    
             )
             .push(
-                // We show the value of the counter here
-                Text::new(&self.value.to_string()).size(50),
-            )
-            .push(
-                // The decrement button. We tell it to produce a
-                // `DecrementPressed` message when pressed
-                Button::new(&mut self.decrement_button, Text::new("-"))
-                    .on_press(Message::DecrementPressed),
-            )
-            .push(
-                Canvas::new(&mut self.canvasState),
+                Canvas::new(&mut self.canvas_state),
             )
             .into()
     }
