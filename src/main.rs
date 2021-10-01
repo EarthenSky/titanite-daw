@@ -4,11 +4,11 @@ use hound;
 
 use iced::{
     button, Button,
-    canvas::{self, Cursor, Path, Frame, Geometry}, Canvas, 
+    Canvas, 
     widget::{Container},
-    Length, Point, Size, 
+    Length,
     executor, Application, Clipboard, Command, Settings, Subscription,
-    Color, Text,
+    Text,
     Element, Column, Row, 
     Rectangle,  
 };
@@ -16,6 +16,7 @@ use iced::{
 // Declaring modules:
 mod model;
 mod colors;
+mod workspace;
 
 // ------------------------------------------------------------------- //
 
@@ -23,7 +24,7 @@ mod colors;
 struct GUIState {
     value: i32,
     settings_button: button::State,
-    canvas_state: CanvasState,
+    canvas_state: workspace::CanvasState,
 }
 
 // This enumerates all the possible ways we can interact with our ui
@@ -42,7 +43,7 @@ impl Application for GUIState {
             GUIState {
                 value: 0,
                 settings_button: button::State::default(),
-                canvas_state: CanvasState::default(),
+                canvas_state: workspace::CanvasState::default(),
             },
             Command::none(),
         )
@@ -62,12 +63,10 @@ impl Application for GUIState {
         Command::none()
     }
 
-    /*
-    fn subscription(&self) -> Subscription<Message> {
-        time::every(std::time::Duration::from_millis(10))
-            .map(|instant| Message::Tick(instant))
-    }
-    */
+    //fn subscription(&self) -> Subscription<Message> {
+    //    time::every(std::time::Duration::from_millis(10))
+    //        .map(|instant| Message::Tick(instant))
+    //}
 
     fn view(&mut self) -> Element<Message> {
 
@@ -93,36 +92,6 @@ impl Application for GUIState {
     }
 
 }
-
-
-// First, we define the data we need for drawing
-#[derive(Debug)]
-struct CanvasState {
-    radius: f32,
-}
-
-impl Default for CanvasState {
-    fn default() -> CanvasState {
-        CanvasState { radius: 5.0 }
-    }
-}
-
-// Then, we implement the `Program` trait
-impl canvas::Program<Message> for CanvasState {
-    fn draw(&self, bounds: Rectangle, _cursor: Cursor) -> Vec<Geometry> {
-        let mut frame = Frame::new(bounds.size());
-
-        frame.fill_rectangle(Point::new(0.0, 0.0), frame.size(), Color::new(1.0, 1.0, 0.6, 1.0));
-
-        // We create a `Path` representing a simple circle & fill it
-        let circle = Path::circle(frame.center(), self.radius);
-        frame.fill(&circle, Color::BLACK);
-
-        // Finally, we produce the geometry
-        vec![frame.into_geometry()]
-    }
-}
-
 
 // ------------------------------------------------------------------- //
 
