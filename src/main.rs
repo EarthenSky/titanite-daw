@@ -15,14 +15,16 @@ use iced::{
 
 // Declaring modules:
 mod model;
+use model::Model;
+
 mod colors;
 mod workspace;
 
 // ------------------------------------------------------------------- //
 
+
 #[derive(Default)]
-struct GUIState {
-    value: i32,
+struct State {
     settings_button: button::State,
     canvas_state: workspace::CanvasState,
 }
@@ -31,17 +33,17 @@ struct GUIState {
 #[derive(Debug, Clone, Copy)]
 pub enum Message {
     ShowSettings,
+    AddNoteBlock(Option<u32>),
 }
 
-impl Application for GUIState {
+impl Application for State {
     type Executor = executor::Default;
     type Message = Message;
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
         (
-            GUIState {
-                value: 0,
+            State {
                 settings_button: button::State::default(),
                 canvas_state: workspace::CanvasState::default(),
             },
@@ -57,10 +59,13 @@ impl Application for GUIState {
         match message {
             Message::ShowSettings => {
                 println!("TODO: open settings window ...");
-            }
+                return Command::none();
+            },
+            Message::AddNoteBlock(optional_id) => {
+                self.canvas_state.model.create_note_block(optional_id);
+                return Command::none();
+            },
         }
-
-        Command::none()
     }
 
     //fn subscription(&self) -> Subscription<Message> {
@@ -96,7 +101,7 @@ impl Application for GUIState {
 // ------------------------------------------------------------------- //
 
 fn main() {
-    println!("Hello, world!");
+    println!("Starting...");
 
     // generate wav file
     let spec = hound::WavSpec {
@@ -116,7 +121,7 @@ fn main() {
     }
 
     // Run Reactive GUI
-    println!("{}", match GUIState::run(Settings::default()) {
+    println!("{}", match State::run(Settings::default()) {
         Err(_e) => "not good not good not good",
         Ok(_) => "we all good",
     });
